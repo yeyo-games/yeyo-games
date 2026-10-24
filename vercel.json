@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
+  "redirects": [
+    {
+      "source": "/deadzone",
+      "destination": "/deadzone/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/deadzone/",
+      "destination": "https://deadzone-five-red.vercel.app/index.html"
+    },
+    {
+      "source": "/deadzone/:path+",
+      "destination": "https://deadzone-five-red.vercel.app/deadzone/:path+"
+    }
+  ]
+}

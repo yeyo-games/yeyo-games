@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0c0e0b;
+  --color-panel: #151913;
+  --color-line: #262d22;
+  --color-accent: #b6f23c;
+  --font-display: "Teko", "Barlow Condensed", sans-serif;
+  --font-body: "Barlow Condensed", system-ui, sans-serif;
+}
+
+body { @apply bg-ink text-zinc-200 font-body; }
