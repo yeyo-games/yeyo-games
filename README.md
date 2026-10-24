@@ -15,3 +15,9 @@ npm run build    # compila a dist/
   (repositorio `leolv7354841-crypto/Juego--safari`), así que siempre muestra su última versión.
 - Supabase (opcional): `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en las variables de
   entorno de Vercel o en un `.env` local (ver `.env.example`).
+
+**Autor de los commits.** El repositorio es privado y el equipo de Vercel está en el plan
+Hobby: Vercel sólo publica commits cuyo autor sea el dueño (`leolv7354841-crypto`); los de otra
+cuenta quedan «Blocked». Por eso este clon tiene configurado `git config user.name/user.email`
+con la cuenta de Leo. En otro equipo, configúralo igual antes de hacer commit, o haz el
+repositorio público, o pasa el equipo de Vercel a Pro y añade a los demás como miembros.
