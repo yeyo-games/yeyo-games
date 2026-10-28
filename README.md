@@ -25,7 +25,7 @@ npm run build    # compila a dist/
   enciende (eso desbloquea el audio), suena el encendido y aparece el globo. El efecto CRT
   (curvatura, scanlines, viñeta, separación RGB, parpadeo) es CSS sobre la pantalla.
 - Música: el menú reproduce en bucle `public/audio/select.mp3` (o `.ogg`) si existe; el archivo
-  no está en el repositorio (la pista es © Capcom) y sin él el menú va en silencio. Los demás
+  está en el repositorio (la pista es © Capcom) y sin él el menú va en silencio. Los demás
   sonidos se sintetizan en `src/scripts/audio.ts`.
 - Cuenta: el lado del jugador 2. «PRESS START BUTTON» (o Tab, o Start en el mando) abre el
   formulario de crear/entrar; `src/lib/account.ts` aún no tiene servicio detrás y responde
