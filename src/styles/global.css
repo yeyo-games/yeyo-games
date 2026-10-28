@@ -1,12 +1,19 @@
 @import "tailwindcss";
 
-@theme {
-  --color-ink: #0c0e0b;
-  --color-panel: #151913;
-  --color-line: #262d22;
-  --color-accent: #b6f23c;
-  --font-display: "Teko", "Barlow Condensed", sans-serif;
-  --font-body: "Barlow Condensed", system-ui, sans-serif;
+:root {
+  /* u: celda del logo de arranque. c: lado del cubo del menú. */
+  --u: clamp(18px, 4vmin, 34px);
+  --c: clamp(230px, 50vmin, 400px);
+  --indigo: #6c5ddc;
 }
 
-body { @apply bg-ink text-zinc-200 font-body; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
