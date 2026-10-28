@@ -1,18 +1,11 @@
 @import "tailwindcss";
 
-:root {
-  /* u: celda del logo de arranque. c: lado del cubo del menú. */
-  --u: clamp(18px, 4vmin, 34px);
-  --c: clamp(230px, 50vmin, 400px);
-  --indigo: #6c5ddc;
-}
-
 html, body { height: 100%; }
 body {
   margin: 0;
   background: #000;
   color: #fff;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Press Start 2P", "Helvetica Neue", Helvetica, Arial, sans-serif;
   overflow: hidden;
   -webkit-user-select: none;
   user-select: none;

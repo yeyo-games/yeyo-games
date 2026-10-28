@@ -1,63 +1,42 @@
 ---
 import Base from '../layouts/Base.astro';
 import { games } from '../data/games';
-
-// Caras del cubo: los juegos ocupan arriba, izquierda y derecha; la cuenta va abajo.
-const LADOS = ['arriba', 'izquierda', 'derecha'] as const;
-const caras = games.slice(0, 3).map((g, i) => ({ lado: LADOS[i], ...g }));
-const etiquetas = [...caras.map((c) => ({ lado: c.lado, texto: c.title })), { lado: 'abajo', texto: 'Cuenta' }];
 ---
 <Base>
-  <div id="encendido" hidden><i></i></div>
-
-  <div id="arranque" class="escena" hidden>
-    <div class="logo" id="logo"></div>
-    <div class="marca">yeyo<b>.games</b></div>
+  <div id="tele">
+    <div id="pantalla">
+      <canvas id="globo" width="640" height="480"></canvas>
+      <button id="start" type="button">PRESS START BUTTON</button>
+      <div id="banda"><span id="nombre"></span></div>
+      <aside id="p2" hidden>
+        <form autocomplete="off">
+          <input name="nombre" placeholder="NOMBRE" maxlength="16" required />
+          <input name="pin" placeholder="PIN" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required />
+          <div class="acciones">
+            <button type="submit" value="crear">CREAR</button>
+            <button type="submit" value="entrar">ENTRAR</button>
+          </div>
+          <b class="duda">?</b>
+        </form>
+      </aside>
+      <div id="destello"></div>
+      <div class="scan"></div>
+      <div class="vidrio"></div>
+    </div>
+    <i id="led"></i>
   </div>
 
-  <main id="menu" hidden>
-    <div class="escena">
-      <div class="flota">
-        <div id="entrada">
-          <div class="cubo" id="cubo">
-            <div class="vidrio"><i class="frente"></i><i class="atras"></i><i class="arriba"></i><i class="abajo"></i><i class="izq"></i><i class="der"></i></div>
-            <div class="nucleo">
-              <section class="cara" data-cara="frente">
-                {etiquetas.map((e) => <button type="button" class:list={['eti', e.lado]} data-lado={e.lado}>{e.texto}</button>)}
-              </section>
-              {caras.map((c) => (
-                <section class="cara" data-cara={c.lado} inert>
-                  <h2>{c.title}</h2>
-                  {c.status === 'live' ? (
-                    <a class="principal" href={c.href}>Jugar</a>
-                  ) : (
-                    <div class="anillo"><b>?</b></div>
-                  )}
-                </section>
-              ))}
-              <section class="cara" data-cara="abajo" inert>
-                <h2>Cuenta</h2>
-                <form autocomplete="off">
-                  <input name="nombre" placeholder="Nombre" maxlength="16" required />
-                  <input name="pin" placeholder="PIN" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required />
-                  <div class="acciones">
-                    <button type="submit" class="principal" value="crear">Crear</button>
-                    <button type="submit" value="entrar">Entrar</button>
-                  </div>
-                  <div class="anillo"><b>?</b></div>
-                </form>
-              </section>
-              <section class="cara" data-cara="atras" inert></section>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <p class="pista">
-      <span class="frente"><b class="palanca"></b> ··· Elegir</span>
-      <span class="dentro"><b class="boton b">B</b> ··· Volver &nbsp; <b class="boton a">A</b> ··· Confirmar</span>
-    </p>
-  </main>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <filter id="rgb" color-interpolation-filters="sRGB">
+      <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+      <feOffset in="r" dx="-1.3" dy="0" result="r2" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+      <feOffset in="b" dx="1.3" dy="0" result="b2" />
+      <feBlend in="r2" in2="g" mode="screen" result="rg" />
+      <feBlend in="rg" in2="b2" mode="screen" />
+    </filter>
+  </svg>
 
   <noscript>
     <ul>{games.filter((g) => g.status === 'live').map((g) => <li><a href={g.href}>{g.title}</a></li>)}</ul>
@@ -67,284 +46,225 @@ const etiquetas = [...caras.map((c) => ({ lado: c.lado, texto: c.title })), { la
 </Base>
 
 <style is:global>
-  /* ---------- escena ---------- */
-  .escena {
+  /* ---------- la tele ---------- */
+  #tele {
     position: fixed;
     inset: 0;
     display: grid;
     place-items: center;
-    perspective: 1500px;
+    background: #000;
   }
-
-  #encendido {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-  }
-  #encendido i {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ffa030;
-    box-shadow: 0 0 12px 2px #ff8a1a88;
-    animation: respira 2.4s ease-in-out infinite;
-  }
-  @keyframes respira {
-    50% { opacity: 0.35; transform: scale(0.85); }
-  }
-
-  /* ---------- arranque: cubitos ---------- */
-  .logo {
+  #pantalla {
+    --px: 1px;
     position: relative;
-    width: calc(var(--u) * 5);
-    height: calc(var(--u) * 6);
-    transform-style: preserve-3d;
-    transform: rotateX(-24deg) rotateY(-36deg);
-    margin-bottom: calc(var(--u) * 2.4);
-  }
-  .mini {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: var(--u);
-    height: var(--u);
-    transform-style: preserve-3d;
-    transform: translate3d(calc(var(--x) * var(--u)), calc(var(--y) * var(--u)), 0);
-  }
-  .mini i {
-    position: absolute;
-    inset: 0.5px;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.22);
-    background: #6c5ddc;
-  }
-  .mini .frente { transform: translateZ(calc(var(--u) / 2)); }
-  .mini .atras { transform: rotateY(180deg) translateZ(calc(var(--u) / 2)); background: #5547c4; }
-  .mini .arriba { transform: rotateX(90deg) translateZ(calc(var(--u) / 2)); background: #a89cff; }
-  .mini .abajo { transform: rotateX(-90deg) translateZ(calc(var(--u) / 2)); background: #3a2f93; }
-  .mini .izq { transform: rotateY(-90deg) translateZ(calc(var(--u) / 2)); background: #4a3db5; }
-  .mini .der { transform: rotateY(90deg) translateZ(calc(var(--u) / 2)); background: #4335a8; }
-  .mini.rueda i { background: #c3bbff; box-shadow: inset 0 0 0 1px rgba(60, 40, 160, 0.35); }
-  .mini.rueda .arriba { background: #e4dfff; }
-  .mini.rueda.clave i { animation: brilla 1.2s ease-out; }
-  @keyframes brilla {
-    0% { background: #fff; }
-  }
-  .marca {
-    position: absolute;
-    top: calc(50% + var(--u) * 3.6);
-    font-size: calc(var(--u) * 1.15);
-    font-weight: 300;
-    letter-spacing: 0.08em;
-    color: #cfc9ff;
-    opacity: 0;
-  }
-  .marca b { font-weight: 700; color: #fff; }
-
-  /* ---------- menú: cubo de cristal ---------- */
-  #menu .escena { perspective: 1300px; }
-  .flota {
-    transform-style: preserve-3d;
-    transform: rotateX(-7deg) rotateY(-9deg);
-  }
-  #menu.posado .flota { animation: vaiven 11s ease-in-out infinite alternate; }
-  @keyframes vaiven {
-    from { transform: rotateX(-9deg) rotateY(-6deg); }
-    to { transform: rotateX(-5deg) rotateY(-12deg); }
-  }
-  #entrada { transform-style: preserve-3d; }
-  .cubo {
-    position: relative;
-    width: var(--c);
-    height: var(--c);
-    transform-style: preserve-3d;
-    transition: transform 0.75s cubic-bezier(0.25, 0.9, 0.3, 1);
-  }
-  .vidrio, .nucleo {
-    position: absolute;
-    inset: 0;
-    transform-style: preserve-3d;
-  }
-  .vidrio { pointer-events: none; }
-  .vidrio i {
-    position: absolute;
-    inset: 0;
-    border-radius: 8%;
-    border: 1px solid rgba(255, 255, 255, 0.42);
-    background: linear-gradient(135deg, rgba(190, 215, 255, 0.09), rgba(90, 130, 170, 0.03) 35%, rgba(90, 130, 170, 0.02) 65%, rgba(190, 215, 255, 0.08));
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-  /* brillo diagonal sobre la cara delantera del cristal */
-  .vidrio .frente::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(118deg, transparent 20%, rgba(255, 255, 255, 0.1) 34%, rgba(255, 255, 255, 0.02) 48%, transparent 60%, rgba(255, 255, 255, 0.06) 92%);
-  }
-  .vidrio .frente { transform: translateZ(calc(var(--c) / 2)); }
-  .vidrio .atras { transform: rotateY(180deg) translateZ(calc(var(--c) / 2)); }
-  .vidrio .arriba { transform: rotateX(90deg) translateZ(calc(var(--c) / 2)); }
-  .vidrio .abajo { transform: rotateX(-90deg) translateZ(calc(var(--c) / 2)); }
-  .vidrio .izq { transform: rotateY(-90deg) translateZ(calc(var(--c) / 2)); }
-  .vidrio .der { transform: rotateY(90deg) translateZ(calc(var(--c) / 2)); }
-
-  .nucleo { inset: 7%; --n: calc(var(--c) * 0.43); }
-  .cara {
-    position: absolute;
-    inset: 0;
-    border-radius: 6%;
-    background:
-      radial-gradient(60% 45% at 68% 30%, rgba(170, 140, 80, 0.16), transparent 70%),
-      radial-gradient(55% 60% at 30% 70%, rgba(70, 150, 125, 0.16), transparent 70%),
-      linear-gradient(118deg, transparent 38%, rgba(255, 255, 255, 0.05) 50%, transparent 62%),
-      radial-gradient(130% 100% at 28% 18%, #2a4352 0%, #172530 45%, #0a1016 100%);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 0 calc(var(--c) * 0.1) rgba(0, 0, 0, 0.55);
-    display: grid;
-    place-items: center;
+    width: 100vw;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
+    background: #050505;
+    border-radius: calc(var(--px) * 16) / calc(var(--px) * 20);
+    box-shadow: 0 0 calc(var(--px) * 60) rgba(60, 90, 255, 0.07);
+    font-family: "Press Start 2P", monospace;
   }
-  .cara[data-cara="frente"] { transform: translateZ(var(--n)); }
-  .cara[data-cara="atras"] { transform: rotateY(180deg) translateZ(var(--n)); }
-  .cara[data-cara="arriba"] { transform: rotateX(90deg) translateZ(var(--n)); }
-  .cara[data-cara="abajo"] { transform: rotateX(-90deg) translateZ(var(--n)); }
-  .cara[data-cara="izquierda"] { transform: rotateY(-90deg) translateZ(var(--n)); }
-  .cara[data-cara="derecha"] { transform: rotateY(90deg) translateZ(var(--n)); }
-
-  /* texto estilo consola: blanco, pesado, con sombra corta */
-  .eti, .cara h2, .principal, .acciones button {
-    font: 700 calc(var(--c) * 0.082) / 1 "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: #fff;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7), 0 0 calc(var(--c) * 0.03) rgba(0, 0, 0, 0.5);
-    background: none;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    cursor: pointer;
-    text-decoration: none;
-    transition: color 0.2s, text-shadow 0.2s;
-  }
-  .eti { position: absolute; opacity: 0; }
-  #menu.posado .eti { animation: aparece 0.5s ease-out forwards; }
-  @keyframes aparece { to { opacity: 1; } }
-  .eti.arriba { top: 5%; left: 50%; transform: translateX(-50%); }
-  .eti.abajo { bottom: 5%; left: 50%; transform: translateX(-50%); }
-  .eti.izquierda { left: 5%; top: 50%; transform: translateY(-50%) rotate(180deg); writing-mode: vertical-rl; }
-  .eti.derecha { right: 5%; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; }
-  .eti:hover, .eti:focus-visible, .principal:hover, .principal:focus-visible, .acciones button:hover, .acciones button:focus-visible {
-    color: #d9d2ff;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7), 0 0 calc(var(--c) * 0.05) rgba(170, 150, 255, 0.9);
-    outline: none;
-  }
-
-  .cara h2 { position: absolute; top: 6%; left: 50%; transform: translateX(-50%); white-space: nowrap; }
-  .principal { font-size: calc(var(--c) * 0.075); }
-  .cara a.principal { margin-top: 20%; }
-
-  /* anillo de espera */
-  .anillo {
-    position: relative;
-    width: calc(var(--c) * 0.3);
-    height: calc(var(--c) * 0.3);
-    display: grid;
-    place-items: center;
-    margin-top: 12%;
-  }
-  .anillo::before {
-    content: "";
+  #globo {
     position: absolute;
     inset: 0;
-    border-radius: 50%;
-    background: repeating-conic-gradient(#8d7dff 0 10deg, transparent 10deg 30deg);
-    -webkit-mask: radial-gradient(circle, transparent 62%, #000 64%, #000 80%, transparent 82%);
-    mask: radial-gradient(circle, transparent 62%, #000 64%, #000 80%, transparent 82%);
-    animation: gira 1.6s steps(12) infinite;
+    width: 100%;
+    height: 100%;
+    display: block;
+    image-rendering: pixelated;
+    touch-action: none;
   }
-  @keyframes gira { to { transform: rotate(360deg); } }
-  .anillo b {
-    font-size: calc(var(--c) * 0.11);
-    color: #d9d2ff;
-    text-shadow: 0 0 calc(var(--c) * 0.04) rgba(160, 140, 255, 0.8);
+  @media (min-width: 700px) {
+    #globo { filter: url(#rgb); }
   }
 
-  /* cuenta */
-  form {
+  /* ---------- texto ---------- */
+  #start {
+    position: absolute;
+    top: calc(var(--px) * 16);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: calc(var(--px) * 4);
+    border: 0;
+    background: none;
+    cursor: pointer;
+    white-space: nowrap;
+    font: calc(var(--px) * 9) / 1 "Press Start 2P", monospace;
+    color: #ffd43a;
+    text-shadow:
+      calc(var(--px) * 1) calc(var(--px) * 1) 0 #7a2200,
+      calc(var(--px) * -1) 0 0 rgba(255, 0, 0, 0.45),
+      calc(var(--px) * 1) 0 0 rgba(0, 255, 255, 0.45);
+    animation: parpadea 1s steps(2) infinite;
+    transition: left 0.6s cubic-bezier(0.3, 0.8, 0.3, 1), transform 0.6s cubic-bezier(0.3, 0.8, 0.3, 1);
+  }
+  #pantalla.encendida #start {
+    left: calc(100% - var(--px) * 22);
+    transform: translateX(-100%);
+  }
+  #start:focus-visible { outline: none; color: #fff; }
+  @keyframes parpadea { 50% { opacity: 0; } }
+
+  /* banda con el nombre, en diagonal */
+  #banda {
+    position: absolute;
+    left: calc(var(--px) * -14);
+    bottom: calc(var(--px) * 38);
+    width: calc(var(--px) * 236);
+    height: calc(var(--px) * 26);
+    transform: rotate(-12deg);
+    transform-origin: left bottom;
+    display: grid;
+    place-items: center;
+    background:
+      repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.12) 0 calc(var(--px) * 3), transparent calc(var(--px) * 3) calc(var(--px) * 9)),
+      linear-gradient(90deg, #0b3cc8 0%, #22d7ff 45%, #0b3cc8 100%);
+    border-top: calc(var(--px) * 3) solid #f4e27a;
+    border-bottom: calc(var(--px) * 3) solid #f4e27a;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #pantalla.encendida #banda { animation: entraBanda 0.5s 0.5s ease-out forwards; }
+  @keyframes entraBanda {
+    from { opacity: 0; transform: rotate(-12deg) translateX(calc(var(--px) * -60)); }
+    to { opacity: 1; }
+  }
+  #nombre {
+    font-size: calc(var(--px) * 12);
+    line-height: 1;
+    color: #fff;
+    transform: skewX(-12deg);
+    text-shadow:
+      calc(var(--px) * 2) 0 0 #0a1a70, calc(var(--px) * -2) 0 0 #0a1a70, 0 calc(var(--px) * 2) 0 #0a1a70, 0 calc(var(--px) * -2) 0 #0a1a70,
+      calc(var(--px) * 2) calc(var(--px) * 2) 0 #0a1a70, calc(var(--px) * -2) calc(var(--px) * -2) 0 #0a1a70,
+      calc(var(--px) * 3) calc(var(--px) * 3) 0 rgba(0, 0, 0, 0.6);
+  }
+  #nombre.bloqueado { color: #a9b4c8; }
+
+  /* ---------- jugador 2: la cuenta ---------- */
+  #p2 {
+    position: absolute;
+    top: calc(var(--px) * 30);
+    right: calc(var(--px) * 24);
+    width: calc(var(--px) * 150);
+    padding: calc(var(--px) * 12) calc(var(--px) * 10);
+    box-sizing: border-box;
+    background: rgba(4, 6, 24, 0.92);
+    border: calc(var(--px) * 2) solid #28dcff;
+    box-shadow: 0 0 calc(var(--px) * 14) rgba(40, 220, 255, 0.55), inset 0 0 calc(var(--px) * 20) rgba(40, 80, 255, 0.25);
+    animation: entraP2 0.3s ease-out;
+  }
+  @keyframes entraP2 {
+    from { opacity: 0; transform: translateX(calc(var(--px) * 40)); }
+  }
+  #p2 form {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: calc(var(--c) * 0.05);
-    width: 62%;
-    margin-top: 14%;
+    gap: calc(var(--px) * 10);
+    margin: 0;
   }
-  form input {
+  #p2 input {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    font: 700 calc(var(--c) * 0.06) / 1.2 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font: calc(var(--px) * 8) / 1.4 "Press Start 2P", monospace;
     color: #fff;
+    text-align: center;
+    background: #0a1030;
+    border: calc(var(--px) * 2) solid #f4b53c;
+    padding: calc(var(--px) * 5) calc(var(--px) * 4);
+    outline: none;
+    letter-spacing: 0.05em;
+  }
+  #p2 input:focus { border-color: #fff; }
+  #p2 input::placeholder { color: rgba(255, 255, 255, 0.4); }
+  #p2 input[name="pin"] { -webkit-text-security: disc; }
+  #p2 .acciones { display: flex; justify-content: space-between; }
+  #p2 .acciones button {
+    font: calc(var(--px) * 8) / 1 "Press Start 2P", monospace;
+    color: #ffd43a;
+    text-shadow: calc(var(--px) * 1) calc(var(--px) * 1) 0 #7a2200;
     background: none;
     border: 0;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.35);
-    padding: calc(var(--c) * 0.015) 0;
-    outline: none;
-    text-align: center;
-    letter-spacing: 0.04em;
+    padding: calc(var(--px) * 4) 0;
+    cursor: pointer;
   }
-  form input:focus { border-color: #b5a8ff; }
-  form input::placeholder { color: rgba(255, 255, 255, 0.45); }
-  form input[name="pin"] { -webkit-text-security: disc; }
-  .acciones { display: flex; justify-content: space-between; margin-top: calc(var(--c) * 0.03); }
-  .acciones button { font-size: calc(var(--c) * 0.07); }
-  form .anillo {
+  #p2 .acciones button:hover, #p2 .acciones button:focus-visible { color: #fff; outline: none; }
+  #p2 .duda {
     position: absolute;
     inset: 0;
-    margin: auto;
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--px) * 28);
+    color: #28dcff;
+    text-shadow: 0 0 calc(var(--px) * 10) #28dcff;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s;
+    transition: opacity 0.2s;
   }
-  form.duda .anillo { opacity: 1; }
-  form.duda > :not(.anillo) { opacity: 0.12; transition: opacity 0.25s; }
+  #p2 form.duda .duda { opacity: 1; animation: parpadea 0.5s steps(2) infinite; }
+  #p2 form.duda > :not(.duda) { opacity: 0.12; transition: opacity 0.2s; }
 
-  /* pista inferior */
-  .pista {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: max(7vh, env(safe-area-inset-bottom));
-    margin: 0;
-    text-align: center;
-    font-size: clamp(12px, 1.7vmin, 15px);
-    color: #c9c9c9;
-    letter-spacing: 0.04em;
+  /* ---------- tubo ---------- */
+  #destello {
+    position: absolute;
+    inset: 0;
+    background: #fff;
     opacity: 0;
-    transition: opacity 0.5s;
+    pointer-events: none;
   }
-  #menu.listo .pista { opacity: 1; }
-  .pista span { display: none; }
-  #menu[data-cara="frente"] .pista .frente, #menu:not([data-cara="frente"]) .pista .dentro { display: inline; }
-  .pista b {
-    display: inline-grid;
-    place-items: center;
-    width: 1.5em;
-    height: 1.5em;
+  #pantalla.encendida #destello { animation: enciende 0.55s ease-out; }
+  #destello.ok { animation: confirmado 0.65s ease-in forwards; }
+  @keyframes enciende {
+    0% { opacity: 0; }
+    25% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+  @keyframes confirmado {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 1; }
+  }
+  .scan, .vidrio {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .scan {
+    background:
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) calc(var(--px) * 1.1), rgba(0, 0, 0, 0.32) calc(var(--px) * 1.1), rgba(0, 0, 0, 0.32) calc(var(--px) * 2)),
+      repeating-linear-gradient(to right, rgba(255, 0, 0, 0.05) 0 33%, rgba(0, 255, 0, 0.04) 33% 66%, rgba(0, 0, 255, 0.05) 66% 100%);
+    background-size: 100% calc(var(--px) * 2), calc(var(--px) * 2) 100%;
+  }
+  .vidrio {
+    background:
+      radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 48%, rgba(0, 0, 0, 0.6) 100%),
+      linear-gradient(168deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0) 38%);
+    box-shadow: inset 0 0 calc(var(--px) * 34) rgba(0, 0, 0, 0.85);
+    animation: tiembla 0.14s steps(2) infinite;
+  }
+  @keyframes tiembla { 50% { opacity: 0.93; } }
+
+  #led {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    font-size: 0.8em;
-    vertical-align: -0.35em;
-    color: #fff;
+    background: #ffa030;
+    box-shadow: 0 0 10px 2px #ff8a1a88;
+    animation: respira 2.4s ease-in-out infinite;
   }
-  .palanca {
-    background: radial-gradient(circle at 40% 35%, #9a9a9a, #3a3a3a 70%);
-    box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 3px #555;
-  }
-  .boton.a { background: #1f9e7a; }
-  .boton.b { background: #c03a3a; }
+  #pantalla.encendida ~ #led { animation: none; background: #5cff6a; box-shadow: 0 0 10px 2px #5cff6a88; }
+  @keyframes respira { 50% { opacity: 0.35; transform: scale(0.85); } }
 
   noscript ul { position: fixed; bottom: 2rem; left: 0; right: 0; text-align: center; list-style: none; padding: 0; }
   noscript a { color: #fff; font-weight: 700; }
 
   @media (prefers-reduced-motion: reduce) {
-    #menu.posado .flota { animation: none; }
-    .cubo { transition-duration: 0.01s; }
+    .vidrio { animation: none; }
+    #start { animation-duration: 2s; }
   }
 </style>

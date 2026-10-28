@@ -1,182 +1,125 @@
-// Sonido del hub, sintetizado con Web Audio: no hay archivos de audio.
-// Timbres de campana (parciales inarmónicos), un sub grave, soplos de ruido y una reverb generada.
+// Sonido del hub. La música de la pantalla de selección es un archivo que pone el dueño del sitio
+// en `public/audio/select.mp3` (o `.ogg`): aquí sólo se carga y se repite en bucle. Si no existe,
+// el menú va en silencio. Los demás sonidos (cursor, confirmar, no, encendido) se sintetizan.
 
 let ctx: AudioContext | null = null;
 let master: GainNode;
-let reverb: ConvolverNode;
+let musicaGain: GainNode;
 
 export function iniciarAudio(): AudioContext {
   if (ctx) return ctx;
   ctx = new AudioContext();
   master = ctx.createGain();
-  master.gain.value = 0.55;
+  master.gain.value = 0.6;
   master.connect(ctx.destination);
-  reverb = ctx.createConvolver();
-  reverb.buffer = impulso(ctx, 2.6, 2.4);
-  const cola = ctx.createGain();
-  cola.gain.value = 0.38;
-  reverb.connect(cola).connect(master);
+  musicaGain = ctx.createGain();
+  musicaGain.gain.value = 0;
+  musicaGain.connect(master);
   return ctx;
 }
 
 export const audioActivo = () => ctx?.state === 'running';
-export const ahora = () => ctx?.currentTime ?? 0;
 
-export function silenciar() {
-  if (!ctx) return;
-  const t = ctx.currentTime;
-  master.gain.cancelScheduledValues(t);
-  master.gain.setValueAtTime(master.gain.value, t);
-  master.gain.linearRampToValueAtTime(0, t + 0.08);
-  master.gain.setValueAtTime(0.55, t + 0.2);
-}
+const PISTAS = ['/audio/select.mp3', '/audio/select.ogg'];
 
-function salida(n: AudioNode) {
-  n.connect(master);
-  n.connect(reverb);
-}
-
-function impulso(c: AudioContext, dur: number, caida: number) {
-  const n = Math.floor(c.sampleRate * dur);
-  const b = c.createBuffer(2, n, c.sampleRate);
-  for (let ch = 0; ch < 2; ch++) {
-    const d = b.getChannelData(ch);
-    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.exp((-caida * i) / c.sampleRate);
+async function cargarPista(c: AudioContext): Promise<AudioBuffer | null> {
+  for (const url of PISTAS) {
+    try {
+      const r = await fetch(url);
+      if (!r.ok || !/audio|octet/.test(r.headers.get('content-type') ?? '')) continue;
+      return await c.decodeAudioData(await r.arrayBuffer());
+    } catch {
+      /* siguiente formato */
+    }
   }
-  return b;
+  return null;
 }
 
-function ruido(c: AudioContext, dur: number) {
-  const n = Math.floor(c.sampleRate * dur);
-  const b = c.createBuffer(1, n, c.sampleRate);
-  const d = b.getChannelData(0);
-  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+// Música en bucle. Devuelve `false` si no hay archivo.
+export async function musica(): Promise<boolean> {
+  const c = iniciarAudio();
+  const buffer = await cargarPista(c);
+  if (!buffer) return false;
   const s = c.createBufferSource();
-  s.buffer = b;
-  return s;
+  s.buffer = buffer;
+  s.loop = true;
+  s.connect(musicaGain);
+  s.start();
+  const t = c.currentTime;
+  musicaGain.gain.setValueAtTime(0, t);
+  musicaGain.gain.linearRampToValueAtTime(0.7, t + 1.2);
+  return true;
 }
 
-function parcial(c: AudioContext, f: number, t: number, dur: number, g: number) {
-  const o = c.createOscillator();
-  const e = c.createGain();
-  o.type = 'sine';
-  o.frequency.value = f;
-  e.gain.setValueAtTime(0, t);
-  e.gain.linearRampToValueAtTime(g, t + 0.004);
-  e.gain.exponentialRampToValueAtTime(0.0004, t + dur);
-  o.connect(e);
-  salida(e);
-  o.start(t);
-  o.stop(t + dur + 0.05);
-}
-
-// Campana: fundamental + dos parciales inarmónicos que se apagan antes.
-export function campana(f: number, t: number, dur = 1.4, g = 0.4) {
-  if (!ctx) return;
-  parcial(ctx, f, t, dur, g);
-  parcial(ctx, f * 2.756, t, dur * 0.35, g * 0.22);
-  parcial(ctx, f * 5.404, t, dur * 0.18, g * 0.08);
-}
-
-// Golpe grave: seno que cae de tono, con un clic de ruido encima.
-export function golpe(t: number, g = 0.9) {
+function tono(tipo: OscillatorType, f0: number, f1: number, t: number, dur: number, g: number) {
   if (!ctx) return;
   const o = ctx.createOscillator();
   const e = ctx.createGain();
-  o.frequency.setValueAtTime(130, t);
-  o.frequency.exponentialRampToValueAtTime(42, t + 0.35);
+  o.type = tipo;
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f1, t + dur);
   e.gain.setValueAtTime(g, t);
-  e.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
-  o.connect(e);
-  salida(e);
+  e.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(e).connect(master);
   o.start(t);
-  o.stop(t + 1);
-  clac(t, 0.35);
+  o.stop(t + dur + 0.02);
 }
 
-// Soplo: ruido por un pasabanda que barre de f0 a f1.
-export function soplo(t: number, dur: number, f0: number, f1: number, g = 0.5) {
+function ruido(t: number, dur: number, f: number, g: number) {
   if (!ctx) return;
-  const s = ruido(ctx, dur);
-  const bp = ctx.createBiquadFilter();
-  bp.type = 'bandpass';
-  bp.Q.value = 0.8;
-  bp.frequency.setValueAtTime(f0, t);
-  bp.frequency.exponentialRampToValueAtTime(f1, t + dur);
-  const e = ctx.createGain();
-  e.gain.setValueAtTime(0.0001, t);
-  e.gain.exponentialRampToValueAtTime(g, t + dur * 0.6);
-  e.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  s.connect(bp).connect(e);
-  salida(e);
-  s.start(t);
-}
-
-// Clac: ruido brevísimo filtrado, como un objeto que se asienta.
-export function clac(t: number, g = 0.5) {
-  if (!ctx) return;
-  const s = ruido(ctx, 0.08);
+  const n = Math.floor(ctx.sampleRate * dur);
+  const b = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  const s = ctx.createBufferSource();
+  s.buffer = b;
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.frequency.value = 1800;
+  lp.frequency.value = f;
   const e = ctx.createGain();
   e.gain.setValueAtTime(g, t);
-  e.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
-  s.connect(lp).connect(e);
-  salida(e);
+  e.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  s.connect(lp).connect(e).connect(master);
   s.start(t);
 }
 
-const D4 = 293.66;
-const nota = (semis: number) => D4 * 2 ** (semis / 12);
-// Pentatónica mayor de Re, ascendiendo con cada salto del cubito.
-export const NOTAS_SALTO = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21].map(nota);
-
-// Jingle de arranque (original, no una copia): un repique ascendente que sigue a los saltos,
-// un acorde de Re mayor con sub grave al aterrizar y una cola larga.
-export function jingle(t0: number, saltos: number[], aterrizaje: number) {
-  saltos.forEach((s, i) => campana(NOTAS_SALTO[i % NOTAS_SALTO.length], t0 + s, 1.1, 0.26));
-  const t = t0 + aterrizaje;
-  golpe(t, 0.8);
-  [0, 4, 7, 12, 16].forEach((semis, i) => campana(nota(semis), t + i * 0.012, 3.2, 0.32 - i * 0.03));
-  campana(nota(24), t + 0.09, 2.4, 0.1);
-  campana(nota(28), t + 0.5, 2.2, 0.06);
-}
-
-export function entradaCubo(t: number) {
-  soplo(t, 1.5, 220, 1400, 0.35);
-}
-
-export function aterrizajeCubo(t: number) {
-  clac(t, 0.45);
-  golpe(t, 0.35);
-  campana(nota(12), t + 0.02, 1.6, 0.08);
-}
-
-export function sonarGiro() {
+// Cursor: un blip corto de onda cuadrada.
+export function sonarCursor() {
   if (!ctx) return;
   const t = ctx.currentTime;
-  soplo(t, 0.28, 500, 1600, 0.18);
-  clac(t + 0.3, 0.2);
+  tono('square', 1100, 1500, t, 0.05, 0.12);
 }
 
+// Confirmar: dos notas que suben, con cuerpo.
 export function sonarOk() {
   if (!ctx) return;
   const t = ctx.currentTime;
-  campana(nota(19), t, 0.6, 0.18);
-  campana(nota(24), t + 0.07, 0.9, 0.18);
+  tono('square', 660, 660, t, 0.09, 0.16);
+  tono('square', 990, 990, t + 0.09, 0.22, 0.16);
+  tono('sawtooth', 165, 110, t, 0.3, 0.2);
 }
 
-export function sonarAtras() {
-  if (!ctx) return;
-  const t = ctx.currentTime;
-  campana(nota(12), t, 0.5, 0.14);
-  campana(nota(7), t + 0.07, 0.8, 0.14);
-}
-
+// Bloqueado: zumbido grave.
 export function sonarNo() {
   if (!ctx) return;
   const t = ctx.currentTime;
-  campana(nota(5), t, 0.5, 0.14);
-  campana(nota(5), t + 0.16, 0.7, 0.12);
+  tono('sawtooth', 140, 90, t, 0.22, 0.2);
+  tono('square', 70, 60, t, 0.22, 0.1);
+}
+
+// Encendido del tubo: golpe grave, chasquido y un zumbido que sube.
+export function sonarEncendido() {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  ruido(t, 0.12, 900, 0.5);
+  tono('sine', 55, 40, t, 0.6, 0.6);
+  tono('sine', 220, 1760, t + 0.1, 0.9, 0.05);
+  tono('triangle', 3520, 7040, t + 0.15, 0.5, 0.03);
+}
+
+// Entra el jugador 2 (la cuenta): arpegio corto.
+export function sonarP2() {
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => tono('square', f, f, t + i * 0.06, 0.12, 0.12));
 }

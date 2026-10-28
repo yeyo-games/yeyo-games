@@ -5,3 +5,7 @@ dist/
 .env*
 !.env.example
 .DS_Store
+
+# La canción del menú la pone el dueño del sitio; no va al repositorio.
+public/audio/*
+!public/audio/.gitkeep

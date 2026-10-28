@@ -10,17 +10,23 @@ npm run dev      # http://localhost:4321
 npm run build    # compila a dist/
 ```
 
-- Catálogo de juegos: `src/data/games.ts`. Portada: `src/pages/index.astro`, un menú tipo consola:
-  un cubo de cristal con los juegos en las caras de arriba, izquierda y derecha (en el orden del
-  catálogo) y la cuenta abajo. Se maneja con flechas/WASD, clic en las etiquetas, deslizando en
-  táctil o con mando (A confirma, B vuelve; Esc o Retroceso vuelven en teclado).
-- Arranque: `src/scripts/boot.ts` dibuja la «y» con cubitos y mete el cubo girando; el sonido se
-  sintetiza en `src/scripts/audio.ts` (sin archivos de audio). Si el navegador bloquea el audio
-  hasta un gesto, la página espera en negro con el LED de encendido y arranca con cualquier tecla
-  o toque. Cualquier tecla o toque durante el arranque lo salta. Con «reducir movimiento» no hay
-  animación, sólo el sonido.
-- Cuenta: `src/lib/account.ts` es el sitio para crear cuenta y entrar. Aún no hay servicio detrás,
-  así que responde `sin-servicio` y la cara del cubo muestra el anillo de «?».
+- Catálogo de juegos: `src/data/games.ts`. Portada: `src/pages/index.astro`, una tele CRT con la
+  pantalla de selección de personaje de Marvel vs. Capcom 2 (versión de consola): un globo con
+  5 × 4 celdas (`src/scripts/globo.ts`, canvas de 640 × 480 escalado), los juegos en el orden del
+  catálogo y las celdas sobrantes bloqueadas con «?». A la izquierda, el retrato y el sprite del
+  juego elegido y la banda con su nombre; el arte pixel se dibuja por código en
+  `src/scripts/sprites.ts` (añade un juego nuevo en `ARTE`, en `src/scripts/hub.ts`). Se maneja
+  con flechas/WASD y Enter, clic o toque en una celda (dos veces confirma), deslizando en táctil o
+  con mando (A confirma, Start abre el lado del jugador 2, B lo cierra).
+- Arranque: la tele empieza apagada con «PRESS START BUTTON»; cualquier tecla, botón o toque la
+  enciende (eso desbloquea el audio), suena el encendido y aparece el globo. El efecto CRT
+  (curvatura, scanlines, viñeta, separación RGB, parpadeo) es CSS sobre la pantalla.
+- Música: el menú reproduce en bucle `public/audio/select.mp3` (o `.ogg`) si existe; el archivo
+  no está en el repositorio (la pista es © Capcom) y sin él el menú va en silencio. Los demás
+  sonidos se sintetizan en `src/scripts/audio.ts`.
+- Cuenta: el lado del jugador 2. «PRESS START BUTTON» (o Tab, o Start en el mando) abre el
+  formulario de crear/entrar; `src/lib/account.ts` aún no tiene servicio detrás y responde
+  `sin-servicio`, que se muestra como «?».
 - **Dead Zone** no vive aquí: `vercel.json` pasa `/deadzone/` al proyecto `deadzone`
   (repositorio `leolv7354841-crypto/Juego--safari`), así que siempre muestra su última versión.
 - Supabase (opcional): `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en las variables de
