@@ -60,6 +60,7 @@ export function menu(globo: Globo, celdas: Celda[], cols: number, ui: Ui) {
     }
     yendo = true;
     sonarOk();
+    globo.bloquear();
     ui.destello.classList.add('ok');
     window.setTimeout(() => {
       location.href = c.href as string;
@@ -70,6 +71,7 @@ export function menu(globo: Globo, celdas: Celda[], cols: number, ui: Ui) {
     if (p2) return;
     p2 = true;
     sonarP2();
+    globo.p2(true);
     ui.p2.hidden = false;
     ui.start.hidden = true;
     ui.pantalla.dataset.p2 = '';
@@ -80,6 +82,7 @@ export function menu(globo: Globo, celdas: Celda[], cols: number, ui: Ui) {
     if (!p2) return;
     p2 = false;
     sonarCursor();
+    globo.p2(false);
     ui.p2.hidden = true;
     ui.start.hidden = false;
     delete ui.pantalla.dataset.p2;

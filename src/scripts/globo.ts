@@ -14,15 +14,27 @@ export type Celda = {
 
 export type Retrato = { retrato: HTMLCanvasElement; cuerpo: HTMLCanvasElement[] };
 
+// Varias constantes vienen del juego (decomp de la versión de PS2): la escena se corre 80 unidades
+// hacia el lado vacío cuando sólo está el jugador 1 y vuelve al centro cuando entra el 2; el anillo
+// del fondo son 32 objetos a 11.25°; los retratos entran volando desde (±900, −100, +800) en
+// 40/38/36 cuadros según la columna (más 0–3 al azar); el cursor aparece a escala 1.2 y baja 0.04
+// por cuadro, su brillo cicla cada 50 cuadros, al confirmar se desvanece 0.05 por cuadro mientras
+// crece 0.01 y luego pulsa a 1.3; su hijo gira una vuelta cada 64 cuadros.
 const W = 640;
 const H = 480;
-const CX = 405;
+const CX_P1 = 320 + 80;
+const CX_AMBOS = 320;
 const CY = 242;
 const R = 170;
 const SEP = (26 * Math.PI) / 180; // separación entre celdas
 const MEDIA = (11.8 * Math.PI) / 180; // media celda
 const PERSPECTIVA = 0.18;
-const ANILLO = 'YEYO.GAMES';
+const ANILLO = 'YEYO.GAMES      YEYO.GAMES      '; // 32 objetos a 11.25°
+const PASO_ANILLO = (2 * Math.PI) / 32;
+const CUADRO = 1000 / 60;
+// Paleta de la rejilla, de los colores empaquetados del juego (0x06F9E8 … 0xD32CFB).
+const REJILLA = ['#06f9e8', '#29d6ec', '#748bf3', '#b44bf8', '#d32cfb'];
+let cx = CX_P1;
 
 type P3 = [number, number, number];
 type P2 = [number, number, number]; // x, y en pantalla y z (profundidad, −1..1)
@@ -40,7 +52,7 @@ function punto(lon: number, lat: number, yaw: number, pitch: number): P3 {
 
 function proyectar([x, y, z]: P3, radio = R): P2 {
   const s = radio * (1 + PERSPECTIVA * z);
-  return [CX + x * s, CY + y * s, z];
+  return [cx + x * s, CY + y * s, z];
 }
 
 // Ruido de valor suavizado para las nubes rojas del fondo.
@@ -89,6 +101,10 @@ export class Globo {
   private encendidoDesde = -1;
   private sacudidaHasta = 0;
   private ultimo = 0;
+  private cxObj = CX_P1;
+  private cursorDesde = 0;
+  private bloqueoDesde = -1;
+  private entradas: { inicio: number; dur: number }[] = [];
   private reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   sel = 0;
   retrato: Retrato | null = null;
@@ -112,14 +128,39 @@ export class Globo {
 
   seleccionar(i: number) {
     this.sel = i;
+    this.cursorDesde = performance.now();
   }
 
   sacudir() {
     this.sacudidaHasta = performance.now() + 320;
   }
 
+  // Confirmado: el cursor se desvanece y pulsa.
+  bloquear() {
+    this.bloqueoDesde = performance.now();
+  }
+
+  // Con el jugador 2 dentro la escena vuelve al centro.
+  p2(dentro: boolean) {
+    this.cxObj = dentro ? CX_AMBOS : CX_P1;
+  }
+
   encender() {
-    this.encendidoDesde = performance.now();
+    const ahora = performance.now();
+    this.encendidoDesde = ahora;
+    this.cursorDesde = ahora;
+    const centro = (this.cols - 1) / 2;
+    this.entradas = this.celdas.map((c) => ({
+      inicio: ahora + 350,
+      dur: (36 + 2 * Math.abs(c.col - centro) + Math.floor(Math.random() * 4)) * CUADRO,
+    }));
+  }
+
+  // Progreso 0..1 de la entrada volando de una celda.
+  private entrada(i: number, ahora: number) {
+    const e = this.entradas[i];
+    if (!e) return 1;
+    return Math.min(1, Math.max(0, (ahora - e.inicio) / e.dur));
   }
 
   // Celda bajo un punto del canvas (coordenadas 640 × 480), o null.
@@ -150,6 +191,7 @@ export class Globo {
     const k = Math.min(1, dt * 7);
     this.yaw += (yawObj - this.yaw) * k;
     this.pitch += (pitchObj - this.pitch) * k;
+    cx += (this.cxObj - cx) * k;
     if (!this.reducido) this.giro += dt * 0.35;
 
     const enc = this.encendidoDesde < 0 ? 0 : Math.min(1, (ahora - this.encendidoDesde) / 900);
@@ -165,7 +207,7 @@ export class Globo {
     if (this.sacudidaHasta > ahora) g.translate(Math.sin(ahora / 12) * 4, 0);
 
     this.fondo(t);
-    this.esfera(t);
+    this.esfera(t, ahora);
     this.panel(t);
     g.globalAlpha = 1;
   }
@@ -229,12 +271,10 @@ export class Globo {
     }
   }
 
-  private esfera(t: number) {
+  private esfera(t: number, ahora: number) {
     const g = this.g;
     const degr = g.createLinearGradient(0, CY - R, 0, CY + R);
-    degr.addColorStop(0, '#48f6ff');
-    degr.addColorStop(0.5, '#b070ff');
-    degr.addColorStop(1, '#ff4ae8');
+    REJILLA.forEach((c, i) => degr.addColorStop(i / (REJILLA.length - 1), c));
     const yawW = this.yaw * 0.5 + this.giro;
     const pitchW = this.pitch * 0.5 + 0.12;
 
@@ -242,12 +282,12 @@ export class Globo {
     this.rejilla(yawW, pitchW, degr, false);
 
     // Cuerpo de la esfera.
-    const cuerpo = g.createRadialGradient(CX - R * 0.35, CY - R * 0.35, R * 0.1, CX, CY, R);
+    const cuerpo = g.createRadialGradient(cx - R * 0.35, CY - R * 0.35, R * 0.1, cx, CY, R);
     cuerpo.addColorStop(0, 'rgba(60,80,170,0.42)');
     cuerpo.addColorStop(1, 'rgba(6,8,34,0.72)');
     g.fillStyle = cuerpo;
     g.beginPath();
-    g.arc(CX, CY, R, 0, Math.PI * 2);
+    g.arc(cx, CY, R, 0, Math.PI * 2);
     g.fill();
 
     // Celdas, de atrás hacia delante.
@@ -255,7 +295,7 @@ export class Globo {
       .map((c) => ({ c, p: proyectar(punto(this.lon(c.col), this.lat(c.fila), this.yaw, this.pitch)) }))
       .filter((x) => x.p[2] > 0.02)
       .sort((a, b) => a.p[2] - b.p[2]);
-    for (const { c, p } of proy) this.celda(c, p[2], t);
+    for (const { c, p } of proy) this.celda(c, p[2], ahora);
 
     this.rejilla(yawW, pitchW, degr, true);
     this.anillo(t);
@@ -298,15 +338,31 @@ export class Globo {
     }
   }
 
-  private celda(c: Celda, z: number, t: number) {
+  private celda(c: Celda, z: number, ahora: number) {
     const g = this.g;
     const lon = this.lon(c.col);
     const lat = this.lat(c.fila);
     const esq = (dl: number, dt: number) => proyectar(punto(lon + dl, lat + dt, this.yaw, this.pitch));
-    const [ax, ay] = esq(-MEDIA, MEDIA);
-    const [bx, by] = esq(MEDIA, MEDIA);
-    const [cx, cy] = esq(MEDIA, -MEDIA);
-    const [dx, dy] = esq(-MEDIA, -MEDIA);
+    let [ax, ay] = esq(-MEDIA, MEDIA);
+    let [bx, by] = esq(MEDIA, MEDIA);
+    let [cx, cy] = esq(MEDIA, -MEDIA);
+    let [dx, dy] = esq(-MEDIA, -MEDIA);
+
+    // Entrada volando: desde fuera de la pantalla, más lejos (más pequeña), hasta su sitio.
+    const e = this.entrada(c.i, ahora);
+    if (e < 1) {
+      const mx = (ax + bx + cx + dx) / 4;
+      const my = (ay + by + cy + dy) / 4;
+      const lado = c.col < (this.cols - 1) / 2 ? -1 : 1;
+      const ox = lado * 900 * (1 - e);
+      const oy = -100 * (1 - e);
+      const s = 0.54 + 0.46 * e;
+      const mueve = (x: number, y: number): [number, number] => [mx + (x - mx) * s + ox, my + (y - my) * s + oy];
+      [ax, ay] = mueve(ax, ay);
+      [bx, by] = mueve(bx, by);
+      [cx, cy] = mueve(cx, cy);
+      [dx, dy] = mueve(dx, dy);
+    }
     const n = c.imagen.width;
     g.save();
     g.transform((bx - ax) / n, (by - ay) / n, (dx - ax) / n, (dy - ay) / n, ax, ay);
@@ -332,12 +388,62 @@ export class Globo {
     g.lineWidth = 1.5;
     g.strokeStyle = c.bloqueada ? 'rgba(150,120,60,0.8)' : '#f4b53c';
     g.stroke();
-    if (c.i === this.sel) {
-      const pulso = 0.6 + 0.4 * Math.sin(t * 9);
-      g.lineWidth = 3;
-      g.strokeStyle = `rgba(255,40,40,${pulso})`;
+    if (c.i === this.sel && e >= 1) this.cursor([ax, ay, bx, by, cx, cy, dx, dy], ahora);
+  }
+
+  // Cursor del jugador 1 sobre la celda: marco rojo con la animación del juego y un hijo que gira.
+  private cursor([ax, ay, bx, by, cx, cy, dx, dy]: number[], ahora: number) {
+    const g = this.g;
+    const f = (ahora - this.cursorDesde) / CUADRO; // cuadros desde el último movimiento
+    let escala = Math.max(1, 1.2 - 0.04 * f);
+    let alfa = 1;
+    let pulso = 0;
+    if (this.bloqueoDesde >= 0) {
+      const fb = (ahora - this.bloqueoDesde) / CUADRO;
+      if (fb < 20) {
+        alfa = Math.max(0, 1 - 0.05 * fb);
+        escala = 1 + 0.01 * fb;
+      } else {
+        alfa = 0;
+        const fp = fb - 20;
+        pulso = fp < 3 ? 1 + 0.1 * fp : Math.max(1, 1.3 - 0.1 * (fp - 3));
+      }
+    }
+    const brillo = 1 - 0.02 * (Math.floor(f) % 50);
+    const mx = (ax + bx + cx + dx) / 4;
+    const my = (ay + by + cy + dy) / 4;
+    const marco = (s: number) => {
+      g.beginPath();
+      g.moveTo(mx + (ax - mx) * s, my + (ay - my) * s);
+      g.lineTo(mx + (bx - mx) * s, my + (by - my) * s);
+      g.lineTo(mx + (cx - mx) * s, my + (cy - my) * s);
+      g.lineTo(mx + (dx - mx) * s, my + (dy - my) * s);
+      g.closePath();
+    };
+    if (alfa > 0) {
+      marco(escala);
+      g.lineWidth = 5;
+      g.strokeStyle = `rgba(255,40,40,${(0.35 * brillo * alfa).toFixed(3)})`;
+      g.stroke();
+      g.lineWidth = 2.5;
+      g.strokeStyle = `rgba(255,40,40,${alfa.toFixed(3)})`;
       g.stroke();
       g.lineWidth = 1;
+      g.strokeStyle = `rgba(255,255,255,${alfa.toFixed(3)})`;
+      g.stroke();
+      // Hijo: un rombo que gira una vuelta cada 64 cuadros.
+      const r = Math.hypot(bx - ax, by - ay) * 0.52 * escala;
+      g.save();
+      g.translate(mx, my);
+      g.rotate((f * 2 * Math.PI) / 64);
+      g.lineWidth = 1;
+      g.strokeStyle = `rgba(255,120,120,${(0.6 * alfa).toFixed(3)})`;
+      g.strokeRect(-r, -r, r * 2, r * 2);
+      g.restore();
+    }
+    if (pulso > 0) {
+      marco(pulso);
+      g.lineWidth = 3;
       g.strokeStyle = '#fff';
       g.stroke();
     }
@@ -346,7 +452,7 @@ export class Globo {
   private anillo(t: number) {
     const g = this.g;
     const n = ANILLO.length;
-    const paso = (2 * Math.PI) / (n + 6);
+    const paso = PASO_ANILLO;
     const tilt = 0.42;
     const base = (this.reducido ? 0 : -t * 0.3) + Math.PI;
     g.font = `13px ${this.fuente}`;
@@ -354,6 +460,7 @@ export class Globo {
     g.textBaseline = 'middle';
     const letras: { x: number; y: number; z: number; ang: number; ch: string }[] = [];
     for (let i = 0; i < n; i++) {
+      if (ANILLO[i] === ' ') continue;
       const a = base + i * paso;
       const p = (ang: number): P3 => {
         const x = 1.22 * Math.sin(ang);

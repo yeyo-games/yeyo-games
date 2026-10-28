@@ -13,7 +13,10 @@ npm run build    # compila a dist/
 - Catálogo de juegos: `src/data/games.ts`. Portada: `src/pages/index.astro`, una tele CRT con la
   pantalla de selección de personaje de Marvel vs. Capcom 2 (versión de consola): un globo con
   5 × 4 celdas (`src/scripts/globo.ts`, canvas de 640 × 480 escalado), los juegos en el orden del
-  catálogo y las celdas sobrantes bloqueadas con «?». A la izquierda, el retrato y el sprite del
+  catálogo y las celdas sobrantes bloqueadas con «?». Varios detalles salen del decomp del juego
+  para PS2 (`g-guthrie/mvc2-ps2-decomp`): la paleta de la rejilla, el anillo de 32 objetos, el
+  desplazamiento de la escena según qué jugadores están, la entrada volando de los retratos y la
+  animación del cursor; las constantes están comentadas al inicio de `globo.ts`. A la izquierda, el retrato y el sprite del
   juego elegido y la banda con su nombre; el arte pixel se dibuja por código en
   `src/scripts/sprites.ts` (añade un juego nuevo en `ARTE`, en `src/scripts/hub.ts`). Se maneja
   con flechas/WASD y Enter, clic o toque en una celda (dos veces confirma), deslizando en táctil o
