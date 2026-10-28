@@ -1,6 +1,7 @@
 // El globo de selección: una esfera con la cuadrícula de juegos al frente y una rejilla de alambre
 // cian/magenta que gira sola, sobre un fondo rojo con las letras YEYO / GAMES desplazándose.
-// Todo se dibuja en un canvas de 640 × 480 (como la consola) que el CSS escala a la pantalla.
+// Todo se dibuja en un canvas de alto 480 (como la consola) que el CSS escala a la pantalla; el ancho
+// es 640 en 4:3 y crece con la pantalla (ver `ancho`), centrando la escena.
 
 export type Celda = {
   i: number;
@@ -20,10 +21,10 @@ export type Retrato = { retrato: HTMLCanvasElement; cuerpo: HTMLCanvasElement[] 
 // 40/38/36 cuadros según la columna (más 0–3 al azar); el cursor aparece a escala 1.2 y baja 0.04
 // por cuadro, su brillo cicla cada 50 cuadros, al confirmar se desvanece 0.05 por cuadro mientras
 // crece 0.01 y luego pulsa a 1.3; su hijo gira una vuelta cada 64 cuadros.
-const W = 640;
 const H = 480;
-const CX_P1 = 320 + 80;
-const CX_AMBOS = 320;
+let W = 640;
+let CX_P1 = 320 + 80;
+let CX_AMBOS = 320;
 const CY = 242;
 const R = 170;
 const SEP = (26 * Math.PI) / 180; // separación entre celdas
@@ -119,6 +120,19 @@ export class Globo {
     this.nube = nubes(96, 72);
   }
 
+  // Ancho lógico del canvas (alto fijo en 480): la escena se centra en el nuevo ancho.
+  ancho(w: number) {
+    w = Math.round(w);
+    if (w === W) return;
+    const antes = this.cxObj === CX_AMBOS;
+    W = w;
+    CX_P1 = W / 2 + 80;
+    CX_AMBOS = W / 2;
+    this.cxObj = antes ? CX_AMBOS : CX_P1;
+    cx = this.cxObj;
+    this.canvas.width = W;
+  }
+
   private lon(col: number) {
     return (col - (this.cols - 1) / 2) * SEP;
   }
@@ -163,7 +177,7 @@ export class Globo {
     return Math.min(1, Math.max(0, (ahora - e.inicio) / e.dur));
   }
 
-  // Celda bajo un punto del canvas (coordenadas 640 × 480), o null.
+  // Celda bajo un punto del canvas (coordenadas del canvas), o null.
   celdaEn(x: number, y: number): Celda | null {
     let mejor: Celda | null = null;
     let d2 = Infinity;
@@ -247,7 +261,8 @@ export class Globo {
     g.font = `8px ${this.fuente}`;
     g.fillStyle = 'rgba(70,95,210,0.35)';
     const linea = 'YEYO GAMES ';
-    for (const [x, vel] of [[14, 18], [152, 26], [268, 14], [462, 22], [612, 30]] as const) {
+    for (const [fx, vel] of [[14, 18], [152, 26], [268, 14], [462, 22], [612, 30]] as const) {
+      const x = (fx * W) / 640;
       const paso = 12;
       const alto = linea.length * paso;
       const off = (t * vel) % alto;

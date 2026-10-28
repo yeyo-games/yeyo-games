@@ -1,7 +1,7 @@
 // Portada: una tele CRT apagada con «PRESS START BUTTON». Cualquier tecla, botón o toque la
 // enciende (y desbloquea el audio): arranca la música y aparece el globo de selección.
 import { games } from '../data/games';
-import { iniciarAudio, musica, sonarEncendido } from './audio';
+import { iniciarAudio, musica, reanudar, sonarEncendido } from './audio';
 import { type Celda, Globo, type Retrato } from './globo';
 import { menu, type Ui } from './menu';
 import { caraDeadZone, cuerpoBloqueado, cuerpoDeadZone, retratoBloqueado, retratoDeadZone, siluetaBloqueada } from './sprites';
@@ -50,11 +50,15 @@ async function principal() {
   const globo = new Globo(canvas, celdas, COLS, FILAS, FUENTE);
   const m = menu(globo, celdas, COLS, ui);
 
-  // La pantalla es 4:3 y el canvas 640 × 480: --px es cuánto mide un píxel del canvas.
+  // El canvas mide 480 de alto y su ancho sigue la proporción de la ventana (de 4:3 a 21:9):
+  // --px es cuánto mide un píxel del canvas.
   function medir() {
-    const w = Math.min(innerWidth, (innerHeight * 4) / 3);
+    const aspecto = Math.min(7 / 3, Math.max(4 / 3, innerWidth / innerHeight));
+    const w = Math.min(innerWidth, innerHeight * aspecto);
+    globo.ancho(480 * aspecto);
     pantalla.style.width = `${w}px`;
-    pantalla.style.setProperty('--px', `${w / 640}px`);
+    pantalla.style.aspectRatio = String(aspecto);
+    pantalla.style.setProperty('--px', `${w / aspecto / 480}px`);
   }
   medir();
   addEventListener('resize', medir);
@@ -64,6 +68,7 @@ async function principal() {
     if (encendida) return;
     encendida = true;
     iniciarAudio();
+    reanudar();
     sonarEncendido();
     void musica();
     pantalla.classList.add('encendida');
@@ -83,6 +88,7 @@ async function principal() {
   };
   document.addEventListener('keydown', gesto);
   document.addEventListener('pointerdown', gesto);
+  for (const ev of ['keydown', 'pointerup', 'click', 'touchend']) document.addEventListener(ev, reanudar);
   window.addEventListener('gamepadconnected', () => {
     const espera = () => {
       if (encendida) return;

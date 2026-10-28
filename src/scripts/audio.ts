@@ -18,6 +18,12 @@ export function iniciarAudio(): AudioContext {
   return ctx;
 }
 
+// Chrome/Safari sólo despiertan el audio con teclado, clic o toque terminado (no con pointerdown):
+// se reintenta en cada uno de esos gestos hasta que el contexto corre.
+export function reanudar() {
+  if (ctx && ctx.state !== 'running') void ctx.resume().catch(() => undefined);
+}
+
 export const audioActivo = () => ctx?.state === 'running';
 
 const PISTAS = ['/audio/select.mp3', '/audio/select.ogg'];
