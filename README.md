@@ -32,6 +32,19 @@ npm run build    # compila a dist/
   `sin-servicio`, que se muestra como «?».
 - **Dead Zone** no vive aquí: `vercel.json` pasa `/deadzone/` al proyecto `deadzone`
   (repositorio `leolv7354841-crypto/Juego--safari`), así que siempre muestra su última versión.
+- **Perrones** tiene su casilla y arte propio en el selector. `/perrones/` redirige a
+  https://perrones.vercel.app/, donde vive el juego y su cooperativo por código de sala.
+  Mantener ese destino conserva el origen de las partidas guardadas y el servidor online
+  configurado. El selector muestra los cuatro hermanos (bulldog inglés, francés, pug y basset),
+  con movimientos individuales y una entrada al cambiar de selección.
+- Los retratos y modelos del selector son originales generados con la herramienta integrada
+  de imágenes de Codex, con los perros de Perrones como referencia de identidad y el arcade
+  de pelea de los 90–2000 como referencia visual. Sus cinco atlas transparentes viven en
+  `public/art/`; `src/scripts/arcade-art.ts` los prepara una vez para canvas. No se cambia el
+  arte del juego ni se copian personajes o logotipos de Marvel/Capcom. `public/art/provenance.json`
+  conserva herramienta, referencias y prompts. Aplican los [términos de OpenAI](https://openai.com/policies/terms-of-use/).
+  Las animaciones respetan movimiento reducido; si falla una descarga, se conserva el arte
+  local de respaldo de `sprites.ts` y `perrones.ts`.
 - Supabase (opcional): `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY` en las variables de
   entorno de Vercel o en un `.env` local (ver `.env.example`).
 

@@ -13,7 +13,11 @@ export type Celda = {
   href?: string;
 };
 
-export type Retrato = { retrato: HTMLCanvasElement; cuerpo: HTMLCanvasElement[] };
+export type Retrato = {
+  retrato: HTMLCanvasElement;
+  cuerpo: HTMLCanvasElement[];
+  pintarCuerpo?: (g: CanvasRenderingContext2D, t: number, reducido: boolean) => void;
+};
 
 // Varias constantes vienen del juego (decomp de la versión de PS2): la escena se corre 80 unidades
 // hacia el lado vacío cuando sólo está el jugador 1 y vuelve al centro cuando entra el 2; el anillo
@@ -107,6 +111,8 @@ export class Globo {
   private bloqueoDesde = -1;
   private entradas: { inicio: number; dur: number }[] = [];
   private reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  private retratoAnterior: Retrato | null = null;
+  private retratoDesde = 0;
   sel = 0;
   retrato: Retrato | null = null;
 
@@ -509,6 +515,14 @@ export class Globo {
     const g = this.g;
     const r = this.retrato;
     if (!r) return;
+    if (r !== this.retratoAnterior) {
+      this.retratoAnterior = r;
+      this.retratoDesde = t;
+    }
+    const entrada = this.reducido ? 1 : Math.min(1, (t - this.retratoDesde) / 0.38);
+    const llegada = 1 - (1 - entrada) ** 3;
+    g.save();
+    g.translate(-52 * (1 - llegada), 0);
     g.fillStyle = '#05060c';
     g.fillRect(22, 26, 92, 158);
     g.drawImage(r.retrato, 26, 30);
@@ -517,7 +531,14 @@ export class Globo {
     g.strokeRect(25, 29, 86, 152);
     g.strokeStyle = 'rgba(40,220,255,0.7)';
     g.strokeRect(22, 26, 92, 158);
-    const cuadro = r.cuerpo[Math.floor(t * 2.2) % r.cuerpo.length];
-    g.drawImage(cuadro, 44, 272, 80, 116);
+    g.restore();
+    g.save();
+    g.translate(-28 * (1 - llegada), 14 * (1 - llegada));
+    if (r.pintarCuerpo) r.pintarCuerpo(g, t, this.reducido);
+    else {
+      const cuadro = r.cuerpo[this.reducido ? 0 : Math.floor(t * 2.2) % r.cuerpo.length];
+      g.drawImage(cuadro, 44, 272, 80, 116);
+    }
+    g.restore();
   }
 }
