@@ -1,11 +1,11 @@
 # yeyo.games
 
 Hub de minijuegos para navegador (Astro + Tailwind), publicado en https://yeyo.games con el
-proyecto `yeyo-games` de Vercel. La revisión nueva está pendiente de publicación: el repositorio
-privado pertenece a la organización `yeyo-games` y Vercel Hobby impide conectar esa combinación
-por Git. También bloqueó el despliegue desde el CLI porque el autor del commit no tiene acceso
-de colaboración al proyecto. El enlace Git antiguo fue retirado; un push a `main` no dispara
-actualmente una publicación automática. Resolver el plan o la visibilidad requiere al dueño.
+proyecto `yeyo-games` de Vercel. El repositorio público `yeyo-games/yeyo-games` está conectado
+al proyecto: `main` es la rama de producción. El propietario autorizó publicar sólo este hub;
+los repositorios del juego Perrones y del relay siguen privados. Vercel Hobby impide conectar
+repositorios privados de organizaciones. Comprueba cada despliegue antes de dar un push por
+publicado. El dominio `www.yeyo.games` también está asociado al proyecto y sirve por HTTPS.
 
 ```bash
 npm install
