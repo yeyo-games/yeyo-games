@@ -1,8 +1,11 @@
 # yeyo.games
 
 Hub de minijuegos para navegador (Astro + Tailwind), publicado en https://yeyo.games con el
-proyecto `yeyo-games` de Vercel. La integración Git está prevista para publicar `main` y generar
-vistas previas de las demás ramas; el resultado de cada despliegue se comprueba en Vercel.
+proyecto `yeyo-games` de Vercel. La revisión nueva está pendiente de publicación: el repositorio
+privado pertenece a la organización `yeyo-games` y Vercel Hobby impide conectar esa combinación
+por Git. También bloqueó el despliegue desde el CLI porque el autor del commit no tiene acceso
+de colaboración al proyecto. El enlace Git antiguo fue retirado; un push a `main` no dispara
+actualmente una publicación automática. Resolver el plan o la visibilidad requiere al dueño.
 
 ```bash
 npm install
@@ -21,6 +24,7 @@ npm run build    # compila a dist/
   `src/scripts/hub.ts` asigna la presentación de cada juego. Se maneja
   con flechas/WASD y Enter, clic o toque en una celda (dos veces confirma), deslizando en táctil o
   con mando (A confirma, Start abre el lado del jugador 2, B lo cierra).
+  Tab recorre los botones: «PRESS START BUTTON» abre la cuenta y «ANIMACIÓN» cambia el movimiento.
 - Arranque: la tele empieza apagada con «PRESS START BUTTON»; cualquier tecla, botón o toque la
   enciende (eso desbloquea el audio), suena el encendido y aparece el globo. El efecto CRT
   (curvatura, scanlines, viñeta, separación RGB, parpadeo) es CSS sobre la pantalla.
