@@ -7,6 +7,7 @@ import { games } from '../data/games';
     <div id="pantalla">
       <canvas id="globo" width="640" height="480"></canvas>
       <button id="start" type="button">PRESS START BUTTON</button>
+      <button id="movimiento" type="button" hidden aria-pressed="false">ANIMACIÓN: NO</button>
       <div id="banda"><span id="nombre"></span></div>
       <aside id="p2" hidden>
         <form autocomplete="off">
@@ -106,11 +107,26 @@ import { games } from '../data/games';
   #start:focus-visible { outline: none; color: #fff; }
   @keyframes parpadea { 50% { opacity: 0; } }
 
+  #movimiento {
+    position: absolute;
+    right: calc(var(--px) * 18);
+    bottom: calc(var(--px) * 10);
+    min-height: 28px;
+    padding: 6px 8px;
+    border: 1px solid #538caa;
+    background: #080f25;
+    color: #d8fbff;
+    font: max(8px, calc(var(--px) * 6)) / 1.5 "Press Start 2P", monospace;
+    cursor: pointer;
+  }
+  #movimiento:hover { border-color: #d8fbff; }
+  #movimiento:focus-visible { outline: 2px solid #f4e27a; outline-offset: 3px; }
+
   /* banda con el nombre, en diagonal */
   #banda {
     position: absolute;
     left: calc(var(--px) * -14);
-    bottom: calc(var(--px) * 38);
+    bottom: calc(var(--px) * 8);
     width: calc(var(--px) * 236);
     height: calc(var(--px) * 26);
     transform: rotate(-12deg);

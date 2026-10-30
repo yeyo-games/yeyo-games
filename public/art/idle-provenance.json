@@ -1,0 +1,75 @@
+{
+  "tool": "OpenAI Codex built-in imagegen",
+  "generatedAt": "2026-10-30",
+  "externalPaidApiUsed": false,
+  "terms": "https://openai.com/policies/terms-of-use/",
+  "deliveryEncoding": {
+    "format": "WebP",
+    "quality": 92,
+    "alphaQuality": 100,
+    "dimensionsUnchanged": true
+  },
+  "identityReference": "Original generated arcade atlas for each character; Perrones identities derive from the game assets.",
+  "assets": [
+    {
+      "id": "perrones",
+      "file": "perrones-idle.webp",
+      "width": 1024,
+      "height": 1536,
+      "columns": 2,
+      "rows": 3,
+      "frames": 6,
+      "sha256": "027c879fbb5f501f53feab1e06eec035d7450c69bed3b8c3a54980fc2d4a8e77",
+      "bytes": 372218,
+      "prompt": "Use case: stylized-concept. Production SIX FRAME LOOPING IDLE SPRITE SHEET for a 2D arcade character selector. Input image is identity and visual rendering reference ONLY. Match the original character exactly in all six cells: bold ink outline, crisp angular cel shadows, golden edge highlights and indigo rim accents, late-90s/early-2000s crossover fighting game like Marvel vs Capcom 2. Create exactly SIX FULL BODY frames in a uniform grid: TWO COLUMNS and THREE ROWS, reading left-to-right then top-to-bottom. Portrait-format sheet. Every cell is the same size. Pure transparent background. At least 10% clear transparent padding within every cell, conspicuous clean transparent gutters between all rows/columns. No portraits, busts, duplicated little faces, text, numbers, grid lines, effects, logos, ground, shadows, weapons, watermarks or checkerboard. Same orthographic 3/4 side view facing RIGHT, identical character size/camera and same feet baseline in every cell. The loop must contain visible articulate movement, not six identical copies; maintain exact anatomy, clothing/fur pattern and silhouette. Frame1 ready stance; frame2 lift the torso/head slightly and shift weight; frame3 lean forward and visibly flex the near forelimb; frame4 release that flex with a small head turn toward the viewer; frame5 settle weight backward with trailing ear/hair motion; frame6 return close to frame1 for a smooth looping sequence. Each subject fully inside its own cell without any overlap or clipping. The stocky white English bulldog with caramel patches, folded brown ears, huge white jowls and stubborn brows. This is a CANINE on four paws, not humanoid. Animate a readable canine ready-idle: chest rises, head tilts, near front paw lifts and lands, ears and tail follow. Keep the body centered; other planted paws stay registered. No collars/clothes/accessories."
+    },
+    {
+      "id": "frances",
+      "file": "frances-idle.webp",
+      "width": 1024,
+      "height": 1536,
+      "columns": 2,
+      "rows": 3,
+      "frames": 6,
+      "sha256": "e5b149cc2b27499d47176325c24965f91ac151358cf8434f6a1bb621f149b4fc",
+      "bytes": 334592,
+      "prompt": "Use case: stylized-concept. Production SIX FRAME LOOPING IDLE SPRITE SHEET for a 2D arcade character selector. Input image is identity and visual rendering reference ONLY. Match the original character exactly in all six cells: bold ink outline, crisp angular cel shadows, golden edge highlights and indigo rim accents, late-90s/early-2000s crossover fighting game like Marvel vs Capcom 2. Create exactly SIX FULL BODY frames in a uniform grid: TWO COLUMNS and THREE ROWS, reading left-to-right then top-to-bottom. Portrait-format sheet. Every cell is the same size. Pure transparent background. At least 10% clear transparent padding within every cell, conspicuous clean transparent gutters between all rows/columns. No portraits, busts, duplicated little faces, text, numbers, grid lines, effects, logos, ground, shadows, weapons, watermarks or checkerboard. Same orthographic 3/4 side view facing RIGHT, identical character size/camera and same feet baseline in every cell. The loop must contain visible articulate movement, not six identical copies; maintain exact anatomy, clothing/fur pattern and silhouette. Frame1 ready stance; frame2 lift the torso/head slightly and shift weight; frame3 lean forward and visibly flex the near forelimb; frame4 release that flex with a small head turn toward the viewer; frame5 settle weight backward with trailing ear/hair motion; frame6 return close to frame1 for a smooth looping sequence. Each subject fully inside its own cell without any overlap or clipping. The compact white and grey-merle French bulldog with tall upright bat ears, short black muzzle and athletic stocky body. This is a CANINE on four paws, not humanoid. Animate a readable canine ready-idle: chest rises, head tilts, near front paw lifts and lands, ears and tail follow. Keep the body centered; other planted paws stay registered. No collars/clothes/accessories."
+    },
+    {
+      "id": "pug",
+      "file": "pug-idle.webp",
+      "width": 1024,
+      "height": 1536,
+      "columns": 2,
+      "rows": 3,
+      "frames": 6,
+      "sha256": "f011fb500ce50dbf1c4541fd84fed53c3c6ca0f31b512c4dce54b7a38775a818",
+      "bytes": 322204,
+      "prompt": "Use case: stylized-concept. Production SIX FRAME LOOPING IDLE SPRITE SHEET for a 2D arcade character selector. Input image is identity and visual rendering reference ONLY. Match the original character exactly in all six cells: bold ink outline, crisp angular cel shadows, golden edge highlights and indigo rim accents, late-90s/early-2000s crossover fighting game like Marvel vs Capcom 2. Create exactly SIX FULL BODY frames in a uniform grid: TWO COLUMNS and THREE ROWS, reading left-to-right then top-to-bottom. Portrait-format sheet. Every cell is the same size. Pure transparent background. At least 10% clear transparent padding within every cell, conspicuous clean transparent gutters between all rows/columns. No portraits, busts, duplicated little faces, text, numbers, grid lines, effects, logos, ground, shadows, weapons, watermarks or checkerboard. Same orthographic 3/4 side view facing RIGHT, identical character size/camera and same feet baseline in every cell. The loop must contain visible articulate movement, not six identical copies; maintain exact anatomy, clothing/fur pattern and silhouette. Frame1 ready stance; frame2 lift the torso/head slightly and shift weight; frame3 lean forward and visibly flex the near forelimb; frame4 release that flex with a small head turn toward the viewer; frame5 settle weight backward with trailing ear/hair motion; frame6 return close to frame1 for a smooth looping sequence. Each subject fully inside its own cell without any overlap or clipping. The small fawn pug with very dark charcoal muzzle and floppy ears, large expressive eyes and tightly curled tail on his rump. This is a CANINE on four paws, not humanoid. Animate a readable canine ready-idle: chest rises, head tilts, near front paw lifts and lands, ears and tail follow. Keep the body centered; other planted paws stay registered. No collars/clothes/accessories."
+    },
+    {
+      "id": "basset",
+      "file": "basset-idle.webp",
+      "width": 1024,
+      "height": 1536,
+      "columns": 2,
+      "rows": 3,
+      "frames": 6,
+      "sha256": "deda5da96d123f44ec47839f6eb8d8d3137396e522596110afd65f3ce4d00e33",
+      "bytes": 329674,
+      "prompt": "Use case: stylized-concept. Production SIX FRAME LOOPING IDLE SPRITE SHEET for a 2D arcade character selector. Input image is identity and visual rendering reference ONLY. Match the original character exactly in all six cells: bold ink outline, crisp angular cel shadows, golden edge highlights and indigo rim accents, late-90s/early-2000s crossover fighting game like Marvel vs Capcom 2. Create exactly SIX FULL BODY frames in a uniform grid: TWO COLUMNS and THREE ROWS, reading left-to-right then top-to-bottom. Portrait-format sheet. Every cell is the same size. Pure transparent background. At least 10% clear transparent padding within every cell, conspicuous clean transparent gutters between all rows/columns. No portraits, busts, duplicated little faces, text, numbers, grid lines, effects, logos, ground, shadows, weapons, watermarks or checkerboard. Same orthographic 3/4 side view facing RIGHT, identical character size/camera and same feet baseline in every cell. The loop must contain visible articulate movement, not six identical copies; maintain exact anatomy, clothing/fur pattern and silhouette. Frame1 ready stance; frame2 lift the torso/head slightly and shift weight; frame3 lean forward and visibly flex the near forelimb; frame4 release that flex with a small head turn toward the viewer; frame5 settle weight backward with trailing ear/hair motion; frame6 return close to frame1 for a smooth looping sequence. Each subject fully inside its own cell without any overlap or clipping. The long low tricolor basset hound with very long caramel ears, white chest and paws, black saddle, soulful determined eyes and short legs. This is a CANINE on four paws, not humanoid. Animate a readable canine ready-idle: chest rises, head tilts, near front paw lifts and lands, ears and tail follow. Keep the body centered; other planted paws stay registered. No collars/clothes/accessories."
+    },
+    {
+      "id": "deadzone",
+      "file": "deadzone-idle.webp",
+      "width": 1024,
+      "height": 1536,
+      "columns": 2,
+      "rows": 3,
+      "frames": 6,
+      "sha256": "31508718ec94547deae16b1c4bf304ab397c0abe1113dea610015ed1d7042c0f",
+      "bytes": 452518,
+      "prompt": "Use case: stylized-concept. Production SIX FRAME LOOPING IDLE SPRITE SHEET for a 2D arcade character selector. Input image is identity and visual rendering reference ONLY. Match the original character exactly in all six cells: bold ink outline, crisp angular cel shadows, golden edge highlights and indigo rim accents, late-90s/early-2000s crossover fighting game like Marvel vs Capcom 2. Create exactly SIX FULL BODY frames in a uniform grid: TWO COLUMNS and THREE ROWS, reading left-to-right then top-to-bottom. Portrait-format sheet. Every cell is the same size. Pure transparent background. At least 10% clear transparent padding within every cell, conspicuous clean transparent gutters between all rows/columns. No portraits, busts, duplicated little faces, text, numbers, grid lines, effects, logos, ground, shadows, weapons, watermarks or checkerboard. Same orthographic 3/4 side view facing RIGHT, identical character size/camera and same feet baseline in every cell. The loop must contain visible articulate movement, not six identical copies; maintain exact anatomy, clothing/fur pattern and silhouette. Frame1 ready stance; frame2 lift the torso/head slightly and shift weight; frame3 lean forward and visibly flex the near forelimb; frame4 release that flex with a small head turn toward the viewer; frame5 settle weight backward with trailing ear/hair motion; frame6 return close to frame1 for a smooth looping sequence. Each subject fully inside its own cell without any overlap or clipping. The original pale olive-grey undead street fighter with orange eyes, swept dark hair, torn olive utility shirt, dark slate trousers and heavy boots. No blood or exposed organs. Animate a fighting idle: shoulders rock, bent elbows/clawed hands move deliberately, knees flex, one heel lifts; feet planted in their original location. Preserve the same hunched athletic character."
+    }
+  ]
+}

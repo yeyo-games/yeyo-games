@@ -27,7 +27,7 @@ export type Retrato = {
 // crece 0.01 y luego pulsa a 1.3; su hijo gira una vuelta cada 64 cuadros.
 const H = 480;
 let W = 640;
-let CX_P1 = 320 + 80;
+let CX_P1 = 320 + 112;
 let CX_AMBOS = 320;
 const CY = 242;
 const R = 170;
@@ -113,6 +113,8 @@ export class Globo {
   private reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
   private retratoAnterior: Retrato | null = null;
   private retratoDesde = 0;
+  private cuentaAbierta = false;
+  private escalaFiguras = 1;
   sel = 0;
   retrato: Retrato | null = null;
 
@@ -132,7 +134,7 @@ export class Globo {
     if (w === W) return;
     const antes = this.cxObj === CX_AMBOS;
     W = w;
-    CX_P1 = W / 2 + 80;
+    CX_P1 = W / 2 + 112;
     CX_AMBOS = W / 2;
     this.cxObj = antes ? CX_AMBOS : CX_P1;
     cx = this.cxObj;
@@ -163,6 +165,11 @@ export class Globo {
   // Con el jugador 2 dentro la escena vuelve al centro.
   p2(dentro: boolean) {
     this.cxObj = dentro ? CX_AMBOS : CX_P1;
+    this.cuentaAbierta = dentro;
+  }
+
+  movimientoReducido(reducido: boolean) {
+    this.reducido = reducido;
   }
 
   encender() {
@@ -212,6 +219,9 @@ export class Globo {
     this.yaw += (yawObj - this.yaw) * k;
     this.pitch += (pitchObj - this.pitch) * k;
     cx += (this.cxObj - cx) * k;
+    const escalaObjetivo = this.cuentaAbierta ? 0.45 : 1;
+    this.escalaFiguras = this.reducido ? escalaObjetivo
+      : this.escalaFiguras + (escalaObjetivo - this.escalaFiguras) * Math.min(1, dt * 9);
     if (!this.reducido) this.giro += dt * 0.35;
 
     const enc = this.encendidoDesde < 0 ? 0 : Math.min(1, (ahora - this.encendidoDesde) / 900);
@@ -484,8 +494,8 @@ export class Globo {
       if (ANILLO[i] === ' ') continue;
       const a = base + i * paso;
       const p = (ang: number): P3 => {
-        const x = 1.22 * Math.sin(ang);
-        const z0 = 1.22 * Math.cos(ang);
+        const x = 1.14 * Math.sin(ang);
+        const z0 = 1.14 * Math.cos(ang);
         return [x, -z0 * Math.sin(tilt), z0 * Math.cos(tilt)];
       };
       const [x, y, z] = proyectar(p(a));
@@ -533,8 +543,9 @@ export class Globo {
     g.strokeRect(22, 26, 92, 158);
     g.restore();
     g.save();
-    g.translate(-28 * (1 - llegada), 14 * (1 - llegada));
-    if (r.pintarCuerpo) r.pintarCuerpo(g, t, this.reducido);
+    g.translate(-52 * (1 - llegada), (1 - this.escalaFiguras) * 400);
+    g.scale(this.escalaFiguras, this.escalaFiguras);
+    if (r.pintarCuerpo) r.pintarCuerpo(g, t - this.retratoDesde, this.reducido);
     else {
       const cuadro = r.cuerpo[this.reducido ? 0 : Math.floor(t * 2.2) % r.cuerpo.length];
       g.drawImage(cuadro, 44, 272, 80, 116);
