@@ -52,6 +52,33 @@ async function principal() {
 
   const globo = new Globo(canvas, celdas, COLS, FILAS, FUENTE);
   const m = menu(globo, celdas, COLS, ui);
+  const movimiento = document.getElementById('movimiento') as HTMLButtonElement;
+  const preferencia = matchMedia('(prefers-reduced-motion: reduce)');
+  let eleccion: boolean | null = null;
+  try {
+    const guardada = localStorage.getItem('yeyo.movimiento');
+    if (guardada === 'si' || guardada === 'no') eleccion = guardada === 'si';
+  } catch { /* El selector también funciona con almacenamiento bloqueado. */ }
+  let animada = eleccion ?? !preferencia.matches;
+  function aplicarMovimiento() {
+    globo.movimientoReducido(!animada);
+    movimiento.textContent = `ANIMACIÓN: ${animada ? 'SÍ' : 'NO'}`;
+    movimiento.setAttribute('aria-pressed', String(animada));
+    movimiento.setAttribute('aria-label', animada ? 'Desactivar animaciones' : 'Activar animaciones');
+  }
+  aplicarMovimiento();
+  movimiento.addEventListener('click', (ev) => {
+    animada = !animada;
+    eleccion = animada;
+    aplicarMovimiento();
+    try { localStorage.setItem('yeyo.movimiento', animada ? 'si' : 'no'); } catch { /* Opcional. */ }
+    if (ev.detail > 0) movimiento.blur();
+  });
+  preferencia.addEventListener('change', () => {
+    if (eleccion !== null) return;
+    animada = !preferencia.matches;
+    aplicarMovimiento();
+  });
 
   // Los controles responden mientras se descarga el arte; si falla, conservan su sprite local.
   void cargarArteArcade().then((arte) => {
@@ -85,6 +112,7 @@ async function principal() {
     sonarEncendido();
     void musica();
     pantalla.classList.add('encendida');
+    movimiento.hidden = false;
     globo.encender();
     const pintar = (t: number) => {
       globo.retrato = celdas[globo.sel].retrato;
