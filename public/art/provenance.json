@@ -1,0 +1,72 @@
+{
+  "tool": "OpenAI Codex built-in imagegen",
+  "generatedAt": "2026-10-30",
+  "externalPaidApiUsed": false,
+  "terms": "https://openai.com/policies/terms-of-use/",
+  "productionPrompt": "Original late-1990s/early-2000s hand-drawn arcade crossover-fighter character-select art, using Marvel vs. Capcom 2 as visual-language reference. Strong ink contours, angular cel-shaded shadows, golden highlights and cool indigo rim lighting, expressive confident poses. Single row of three separated assets: head/chest portrait, complete right-facing ready stance, second idle stance at the same scale and feet baseline. Preserve canine quadruped anatomy for dogs. Genuine transparent background, complete silhouettes, no text, logos, checkerboard, ground, cast shadow, weapons or copied franchise characters.",
+  "promptNote": "Production brief; exact generation requests remain in the Codex conversation.",
+  "deliveryEncoding": {
+    "format": "WebP",
+    "quality": 92,
+    "alphaQuality": 100,
+    "dimensionsUnchanged": true
+  },
+  "animation": "Runtime canvas transforms and two source poses; basset uses its complete final pose for both idle frames.",
+  "assets": [
+    {
+      "id": "perrones",
+      "file": "perrones-arcade.webp",
+      "width": 2170,
+      "height": 725,
+      "bytes": 375364,
+      "sha256": "7fdc1667e415daa10b6d253f11b89b2fce8230d9d780b4ff04db1dac8ca62573",
+      "originalPngSha256": "e80a9ffaa1324e0d41d81ce88690bdc28e7921f424c6b92280acfbe790ec4fc9",
+      "subject": "White English bulldog with caramel patches, floppy brown ears, broad white jowls and stubborn eyebrows. Identity reference: Perrones bulldog/select.png.",
+      "styleReference": null
+    },
+    {
+      "id": "frances",
+      "file": "frances-arcade.webp",
+      "width": 2169,
+      "height": 725,
+      "bytes": 329552,
+      "sha256": "3d5807143279122e9de052fa9f35a635de8f3ad237523a9d5d65e88b390ceafe",
+      "originalPngSha256": "41476c20d7dff3fe15bba3c63f5f894ef6f109c1ce05d5d9c276436a75cc8e4d",
+      "subject": "Compact white and grey-merle French bulldog, tall upright bat ears with pale pink interiors, short black muzzle. Identity reference: Perrones frances/select.png.",
+      "styleReference": "Generated English bulldog atlas for consistent rendering"
+    },
+    {
+      "id": "pug",
+      "file": "pug-arcade.webp",
+      "width": 2169,
+      "height": 725,
+      "bytes": 324432,
+      "sha256": "76323803519157ab025425275860a6cc323d500e4c103304de212759b0645f05",
+      "originalPngSha256": "9809f8632ca276cab561e280cd94e2ea0701172cd91cb17e63097198e1f74722",
+      "subject": "Fawn pug, dark charcoal muzzle and floppy ears, round expressive eyes, tightly curled tail. Identity reference: Perrones pug/select.png.",
+      "styleReference": "Generated English bulldog atlas for consistent rendering"
+    },
+    {
+      "id": "basset",
+      "file": "basset-arcade.webp",
+      "width": 2172,
+      "height": 724,
+      "bytes": 357752,
+      "sha256": "91f0535ebd8039fc702401c68747211d7f5ab312d28479451c28065d797ae267",
+      "originalPngSha256": "d510574f1015f591737af72e6cf0ad0f93c959fd622baf0cff4555280f8aea31",
+      "subject": "Long low tricolor basset hound, long caramel ears, white chest/paws, black saddle, soulful determined eyes. Identity reference: Perrones basset/select.png.",
+      "styleReference": "Generated English bulldog atlas for consistent rendering"
+    },
+    {
+      "id": "deadzone",
+      "file": "deadzone-arcade.webp",
+      "width": 1942,
+      "height": 809,
+      "bytes": 425884,
+      "sha256": "4ac1f25962f89701d7ea2662fbb1559b59fcee903fb00dd85c6cf4bca40c9920",
+      "originalPngSha256": "b659bb1451582d9b76d96e0af34a5a0b47090f7d4895525385b7efde680e69e1",
+      "subject": "Original undead male street survivor with pale olive-grey skin, orange eyes, swept dark hair, torn olive utility shirt, dark slate trousers and heavy boots. No blood or exposed organs.",
+      "styleReference": null
+    }
+  ]
+}

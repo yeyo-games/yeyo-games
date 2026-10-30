@@ -4,6 +4,8 @@ import { games } from '../data/games';
 import { iniciarAudio, musica, reanudar, sonarEncendido } from './audio';
 import { type Celda, Globo, type Retrato } from './globo';
 import { menu, type Ui } from './menu';
+import { cargarArteArcade } from './arcade-art';
+import { caraPerrones, cuerpoPerrones, retratoPerrones } from './perrones';
 import { caraDeadZone, cuerpoBloqueado, cuerpoDeadZone, retratoBloqueado, retratoDeadZone, siluetaBloqueada } from './sprites';
 
 const COLS = 5;
@@ -13,6 +15,7 @@ const FUENTE = '"Press Start 2P", monospace';
 // Arte de cada juego, por slug. Los que no tienen quedan como bloqueados.
 const ARTE: Record<string, () => { celda: HTMLCanvasElement } & Retrato> = {
   deadzone: () => ({ celda: caraDeadZone(), retrato: retratoDeadZone(), cuerpo: cuerpoDeadZone() }),
+  perrones: () => ({ celda: caraPerrones(), retrato: retratoPerrones(), cuerpo: cuerpoPerrones() }),
 };
 
 type CeldaHub = Celda & { href?: string; retrato: Retrato };
@@ -49,6 +52,16 @@ async function principal() {
 
   const globo = new Globo(canvas, celdas, COLS, FILAS, FUENTE);
   const m = menu(globo, celdas, COLS, ui);
+
+  // Los controles responden mientras se descarga el arte; si falla, conservan su sprite local.
+  void cargarArteArcade().then((arte) => {
+    for (let i = 0; i < games.length; i++) {
+      const nuevo = arte[games[i].slug];
+      if (!nuevo || !celdas[i]) continue;
+      celdas[i].imagen = nuevo.celda;
+      celdas[i].retrato = { retrato: nuevo.retrato, cuerpo: nuevo.cuerpo, pintarCuerpo: nuevo.pintarCuerpo };
+    }
+  });
 
   // El canvas mide 480 de alto y su ancho sigue la proporción de la ventana (de 4:3 a 21:9):
   // --px es cuánto mide un píxel del canvas.

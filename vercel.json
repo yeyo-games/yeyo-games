@@ -3,6 +3,16 @@
   "framework": "astro",
   "redirects": [
     {
+      "source": "/perrones",
+      "destination": "https://perrones.vercel.app/",
+      "permanent": false
+    },
+    {
+      "source": "/perrones/:path*",
+      "destination": "https://perrones.vercel.app/:path*",
+      "permanent": false
+    },
+    {
       "source": "/deadzone",
       "destination": "/deadzone/",
       "permanent": false

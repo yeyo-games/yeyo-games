@@ -90,7 +90,10 @@ export function menu(globo: Globo, celdas: Celda[], cols: number, ui: Ui) {
     (document.activeElement as HTMLElement | null)?.blur();
   }
 
-  ui.start.addEventListener('click', () => activo && abrirP2());
+  ui.start.addEventListener('click', () => {
+    if (activo) abrirP2();
+    else ui.start.blur();
+  });
 
   document.addEventListener('keydown', (ev) => {
     if (!activo) return;
