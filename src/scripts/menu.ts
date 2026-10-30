@@ -101,9 +101,6 @@ export function menu(globo: Globo, celdas: Celda[], cols: number, ui: Ui) {
     if (ev.key === 'Escape') {
       ev.preventDefault();
       cerrarP2();
-    } else if (ev.key === 'Tab' && !p2) {
-      ev.preventDefault();
-      abrirP2();
     } else if (campo) return;
     else if (ev.key in TECLAS) {
       ev.preventDefault();
